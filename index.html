@@ -98,6 +98,10 @@
     #downloadPdfBtn{display:none;}
     #printTitle{display:block; font-family:var(--serif); font-size:1.2rem; font-weight:700; margin-bottom:10px;}
   }
+  .footer{
+    text-align:center; font-size:0.78rem; color:var(--muted); margin:8px 0 0;
+  }
+  @media print{ .footer{display:none;} }
 </style>
 </head>
 <body>
@@ -194,6 +198,8 @@
       </table>
     </div>
   </div>
+
+  <p class="footer">Powered by Thilina</p>
 </div>
 
 <script>
