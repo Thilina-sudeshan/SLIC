@@ -6,8 +6,8 @@
 <title>Policy Bonus &amp; Maturity Value Calculator</title>
 <style>
   :root{
-    --bg:#eef2f0; --card:#ffffff; --text:#132420; --muted:#5a6b66;
-    --border:#d7e0dc; --accent:#0f6e5c; --accent-strong:#0b5346; --accent-soft:#e3f1ec;
+    --bg:#f4f6f9; --card:#ffffff; --text:#16202b; --muted:#5c6b7a;
+    --border:#dbe3ec; --accent:#1266b0; --accent-strong:#0b4f8a; --accent-soft:#e6eff8;
     --gold:#96701f; --gold-soft:#f7ecd6; --danger:#b3261e; --danger-soft:#fbe9e7;
     --warn:#8a6300; --warn-bg:#fff6e0; --warn-border:#e8b93b;
     --serif:Georgia,'Iowan Old Style','Palatino Linotype',serif;
@@ -15,8 +15,8 @@
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --bg:#0d1614; --card:#152420; --text:#e8f0ec; --muted:#93a39d;
-      --border:#24352f; --accent:#3ecbaa; --accent-strong:#63dbc0; --accent-soft:#193029;
+      --bg:#0d1420; --card:#141f2b; --text:#e7edf5; --muted:#93a3b3;
+      --border:#223244; --accent:#4da3e0; --accent-strong:#6cb8ec; --accent-soft:#142433;
       --gold:#e0b256; --gold-soft:#2a2214; --danger:#ff8078; --danger-soft:#2a1512;
       --warn:#e8c766; --warn-bg:#2a2410; --warn-border:#5c4d1a;
     }
@@ -25,15 +25,15 @@
   body{margin:0; font-family:var(--sans); background:var(--bg); color:var(--text);}
   .page{max-width:900px; margin:0 auto; padding:0 16px 40px;}
   .letterhead{
-    background:var(--accent-strong); color:#fdfdfa; padding:22px 16px 20px;
-    margin:0 -16px 20px; border-radius:0 0 14px 14px;
+    background:transparent; color:var(--text); padding:26px 16px 18px;
+    border-bottom:1px solid var(--border); margin:0 -16px 20px;
   }
   .letterhead-inner{max-width:868px; margin:0 auto;}
   .letterhead h1{
     font-family:var(--serif); font-size:1.5rem; font-weight:700; margin:0 0 4px;
-    text-wrap:balance; letter-spacing:0.2px;
+    text-wrap:balance; letter-spacing:0.2px; color:var(--accent-strong);
   }
-  .letterhead p{margin:0; font-size:0.88rem; color:#dff2ec; opacity:0.92;}
+  .letterhead p{margin:0; font-size:0.88rem; color:var(--muted);}
   h2{
     font-family:var(--serif); font-size:1.05rem; font-weight:700; margin:0 0 14px;
     color:var(--accent-strong);
