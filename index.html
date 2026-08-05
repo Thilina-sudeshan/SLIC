@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Policy Bonus &amp; Maturity Value Calculator</title>
+<style>
+  :root{
+    --bg:#eef2f0; --card:#ffffff; --text:#132420; --muted:#5a6b66;
+    --border:#d7e0dc; --accent:#0f6e5c; --accent-strong:#0b5346; --accent-soft:#e3f1ec;
+    --gold:#96701f; --gold-soft:#f7ecd6; --danger:#b3261e; --danger-soft:#fbe9e7;
+    --warn:#8a6300; --warn-bg:#fff6e0; --warn-border:#e8b93b;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    --sans:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0d1614; --card:#152420; --text:#e8f0ec; --muted:#93a39d;
+      --border:#24352f; --accent:#3ecbaa; --accent-strong:#63dbc0; --accent-soft:#193029;
+      --gold:#e0b256; --gold-soft:#2a2214; --danger:#ff8078; --danger-soft:#2a1512;
+      --warn:#e8c766; --warn-bg:#2a2410; --warn-border:#5c4d1a;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:var(--sans); background:var(--bg); color:var(--text);}
+  .page{max-width:900px; margin:0 auto; padding:0 16px 40px;}
+  .letterhead{
+    background:var(--accent-strong); color:#fdfdfa; padding:22px 16px 20px;
+    margin:0 -16px 20px; border-radius:0 0 14px 14px;
+  }
+  .letterhead-inner{max-width:868px; margin:0 auto;}
+  .letterhead h1{
+    font-family:var(--serif); font-size:1.5rem; font-weight:700; margin:0 0 4px;
+    text-wrap:balance; letter-spacing:0.2px;
+  }
+  .letterhead p{margin:0; font-size:0.88rem; color:#dff2ec; opacity:0.92;}
+  h2{
+    font-family:var(--serif); font-size:1.05rem; font-weight:700; margin:0 0 14px;
+    color:var(--accent-strong);
+  }
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:18px; margin-bottom:16px;
+  }
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+  @media (max-width:520px){ .grid{grid-template-columns:1fr;} }
+  label{display:block; font-size:0.78rem; font-weight:600; letter-spacing:0.02em; color:var(--muted); margin-bottom:5px; text-transform:uppercase;}
+  input[type=text], input[type=date], input[type=number], select{
+    width:100%; padding:10px 11px; border:1px solid var(--border); border-radius:7px;
+    font-size:1rem; font-family:var(--sans); background:var(--card); color:var(--text);
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible{
+    outline:2px solid var(--accent); outline-offset:1px;
+  }
+  input:read-only{background:var(--accent-soft); color:var(--muted);}
+  .field{margin-bottom:2px;}
+  button{
+    background:var(--accent-strong); color:#fdfdfa; border:none; border-radius:7px;
+    padding:12px 22px; font-size:0.95rem; font-weight:600; cursor:pointer; font-family:var(--sans);
+  }
+  button:hover{opacity:0.9;}
+  button.secondary{
+    background:transparent; color:var(--accent-strong); border:1px solid var(--accent-strong);
+    padding:8px 14px; font-size:0.83rem; font-weight:600;
+  }
+  button.small{padding:4px 10px; font-size:0.78rem;}
+  button.danger{background:transparent; color:var(--danger); border:1px solid var(--danger);}
+  .rates-table, .result-table{width:100%; border-collapse:collapse; font-size:0.88rem;}
+  .rates-table th, .rates-table td, .result-table th, .result-table td{
+    border:1px solid var(--border); padding:7px 9px; text-align:right; font-variant-numeric:tabular-nums;
+  }
+  .rates-table th:first-child, .rates-table td:first-child,
+  .result-table th:first-child, .result-table td:first-child{text-align:left; font-variant-numeric:normal;}
+  .rates-table input{padding:6px; font-size:0.85rem;}
+  .result-table thead th{background:var(--accent-strong); color:#fdfdfa; position:sticky; top:0; font-weight:600;}
+  .result-table tbody tr:nth-child(even){background:var(--accent-soft);}
+  .table-scroll{overflow-x:auto; border-radius:8px;}
+  .summary{display:grid; grid-template-columns:repeat(2,1fr); gap:7px 20px; font-size:0.9rem; margin-bottom:14px;}
+  @media (max-width:520px){ .summary{grid-template-columns:1fr;} }
+  .summary div span.k{color:var(--muted); font-weight:600;}
+  .rates-row-actions{white-space:nowrap;}
+  .actions-bar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px;}
+  .hint{font-size:0.78rem; color:var(--muted); margin-top:8px; line-height:1.5;}
+  .total-row td{font-weight:700; background:var(--gold-soft) !important; color:var(--gold);}
+  .table-picker{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:14px;}
+  .table-picker .field{flex:1; min-width:220px; margin-bottom:0;}
+  .warning{
+    background:var(--warn-bg); border:1px solid var(--warn-border); color:var(--warn);
+    border-radius:8px; padding:11px 13px; font-size:0.85rem; margin-bottom:14px; line-height:1.5;
+  }
+  .results-header{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;}
+  .results-header h2{margin-bottom:0;}
+  #printTitle{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #resultsCard, #resultsCard *{visibility:visible;}
+    #resultsCard{position:absolute; left:0; top:0; width:100%; border:none; box-shadow:none;}
+    #downloadPdfBtn{display:none;}
+    #printTitle{display:block; font-family:var(--serif); font-size:1.2rem; font-weight:700; margin-bottom:10px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="letterhead">
+    <div class="letterhead-inner">
+      <h1>Policy Bonus &amp; Maturity Value Calculator</h1>
+      <p>Enter policy details below, then press Calculate to build the year-by-year table.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Policy Holder Details</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Policy holder's name" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="age">Age (auto)</label>
+        <input type="text" id="age" readonly autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="startYear">Policy Start Year</label>
+        <input type="number" id="startYear" step="1" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="sumAssured">Sum Assured (Rs.)</label>
+        <input type="number" id="sumAssured" step="0.01" placeholder="e.g. 5000000" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="period">Period (years)</label>
+        <input type="number" id="period" step="1" placeholder="e.g. 23" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="premium">Annual Investment / Premium (Rs.)</label>
+        <input type="number" id="premium" step="0.01" placeholder="e.g. 247300" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Bonus Rate Bands (Rs. per 1,000 of Sum Assured, per year)</h2>
+    <div class="table-picker">
+      <div class="field">
+        <label for="tableSelect">Policy Table (Sri Lanka Insurance Bonus Summary Chart)</label>
+        <select id="tableSelect"></select>
+      </div>
+      <button type="button" class="secondary" id="loadTableBtn">Load Rates for This Table</button>
+    </div>
+    <div class="table-scroll">
+      <table class="rates-table" id="ratesTable">
+        <thead>
+          <tr><th>From Year</th><th>To Year</th><th>Rate / 1000</th><th></th></tr>
+        </thead>
+        <tbody id="ratesBody"></tbody>
+      </table>
+    </div>
+    <div class="actions-bar">
+      <button type="button" class="secondary" id="addRateRow">+ Add Band</button>
+    </div>
+    <p class="hint">Rates come from the official Bonus Summary Chart (per Rs. 1,000 sum assured, per year). Pick the Table number that matches this policy plan, or edit the bands manually below. Rows are editable/removable in case rates are revised. Any policy year beyond the last defined band keeps using that band's rate &mdash; a warning will show if that happens.</p>
+  </div>
+
+  <div class="actions-bar">
+    <button type="button" id="calcBtn">Calculate</button>
+  </div>
+
+  <div class="card" id="resultsCard" style="display:none;">
+    <div id="printTitle">Policy Bonus &amp; Maturity Value Statement</div>
+    <div class="results-header">
+      <h2>Results</h2>
+      <button type="button" class="secondary" id="downloadPdfBtn">Download PDF</button>
+    </div>
+    <div class="warning" id="rangeWarning" style="display:none;"></div>
+    <div class="summary" id="summary"></div>
+    <div class="table-scroll">
+      <table class="result-table" id="resultTable">
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>Annual Deposit (Rs.)</th>
+            <th>Deposit Balance (Rs.)</th>
+            <th>Annual Bonus Award (Rs.)</th>
+            <th>Value of Basic Sum Assured (Rs.)</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// Source: Sri Lanka Insurance "2025YE - Bonus Summary Chart".
+// Each array = rate per Rs.1000 sum assured for duration bands: 0-4,5-9,10-14,15-19,20-24,25-29,30+ (null = not published).
+const BONUS_TABLES = {
+  "1,3,5,12,14,17,35,36,37,60,61,62": [50,65,75,135,195,215,240],
+  "13": [40,55,70,110,null,null,null],
+  "7,8": [50,55,65,70,null,null,null],
+  "27": [45,55,60,60,70,70,70],
+  "38": [35,50,65,65,70,null,null],
+  "39": [50,55,60,65,65,65,null],
+  "43,44": [50,50,50,50,50,50,null],
+  "45,49,57,66": [40,50,65,65,65,null,null],
+  "46": [40,50,65,65,null,null,null],
+  "50": [40,50,50,55,null,null,null],
+  "29": [40,55,70,125,125,125,125],
+  "28": [50,55,65,70,70,70,70],
+  "56": [35,50,null,null,null,null,null],
+  "58": [75,95,null,null,null,null,null]
+};
+// Duration band 0-4 etc. maps to policy years 1-5 etc. (30+ has no upper bound).
+const DURATION_YEAR_RANGES = [[1,5],[6,10],[11,15],[16,20],[21,25],[26,30],[31,Infinity]];
+
+const TABLE_DISPLAY_ORDER = [
+  "1,3,5,12,14,17,35,36,37,60,61,62","7,8","13","27","28","29",
+  "38","39","43,44","45,49,57,66","46","50","56","58"
+];
+
+const tableSelect = document.getElementById('tableSelect');
+TABLE_DISPLAY_ORDER.forEach(code => {
+  const opt = document.createElement('option');
+  opt.value = code;
+  opt.textContent = `Table ${code}`;
+  tableSelect.appendChild(opt);
+});
+
+const ratesBody = document.getElementById('ratesBody');
+
+function addRateRow(band){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="number" class="r-from" value="${band ? band.from : ''}" step="1"></td>
+    <td><input type="number" class="r-to" value="${band && band.to !== Infinity ? band.to : ''}" placeholder="${band && band.to === Infinity ? 'no limit' : ''}" step="1"></td>
+    <td><input type="number" class="r-rate" value="${band ? band.rate : ''}" step="0.01"></td>
+    <td class="rates-row-actions"><button type="button" class="secondary small danger remove-row">Remove</button></td>
+  `;
+  tr.querySelector('.remove-row').addEventListener('click', () => tr.remove());
+  ratesBody.appendChild(tr);
+}
+
+function loadTableRates(code){
+  const rates = BONUS_TABLES[code];
+  if(!rates) return;
+  ratesBody.innerHTML = '';
+  rates.forEach((rate, i) => {
+    if(rate === null) return;
+    const [from, to] = DURATION_YEAR_RANGES[i];
+    addRateRow({from, to, rate});
+  });
+}
+
+const DEFAULT_TABLE = "1,3,5,12,14,17,35,36,37,60,61,62";
+tableSelect.value = DEFAULT_TABLE;
+loadTableRates(tableSelect.value);
+
+document.getElementById('addRateRow').addEventListener('click', () => addRateRow());
+document.getElementById('loadTableBtn').addEventListener('click', () => loadTableRates(tableSelect.value));
+
+function readRateBands(){
+  const rows = [...ratesBody.querySelectorAll('tr')];
+  const bands = rows.map(row => {
+    const toRaw = row.querySelector('.r-to').value;
+    return {
+      from: parseInt(row.querySelector('.r-from').value, 10),
+      to: toRaw === '' ? Infinity : parseInt(toRaw, 10),
+      rate: parseFloat(row.querySelector('.r-rate').value)
+    };
+  }).filter(b => Number.isFinite(b.from) && Number.isFinite(b.rate) && (b.to === Infinity || Number.isFinite(b.to)));
+  bands.sort((a,b) => a.from - b.from);
+  return bands;
+}
+
+function rateForYear(bands, year){
+  for(const b of bands){
+    if(year >= b.from && year <= b.to) return b.rate;
+  }
+  if(bands.length && year > bands[bands.length-1].to) return bands[bands.length-1].rate;
+  return 0;
+}
+
+function calcAge(dobStr, refYear){
+  if(!dobStr) return '';
+  const dob = new Date(dobStr);
+  const refDate = new Date();
+  refDate.setFullYear(refYear || refDate.getFullYear());
+  let age = refDate.getFullYear() - dob.getFullYear();
+  const hasHadBirthdayThisYear =
+    (refDate.getMonth() > dob.getMonth()) ||
+    (refDate.getMonth() === dob.getMonth() && refDate.getDate() >= dob.getDate());
+  if(!hasHadBirthdayThisYear) age -= 1;
+  return age;
+}
+
+const dobEl = document.getElementById('dob');
+const startYearEl = document.getElementById('startYear');
+const ageEl = document.getElementById('age');
+
+startYearEl.value = new Date().getFullYear();
+
+function refreshAge(){
+  ageEl.value = calcAge(dobEl.value, parseInt(startYearEl.value, 10));
+}
+dobEl.addEventListener('change', refreshAge);
+startYearEl.addEventListener('change', refreshAge);
+refreshAge();
+
+function fmt(n){
+  return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+document.getElementById('calcBtn').addEventListener('click', () => {
+  const name = document.getElementById('name').value.trim();
+  const dob = dobEl.value;
+  const startYear = parseInt(startYearEl.value, 10);
+  const sumAssured = parseFloat(document.getElementById('sumAssured').value);
+  const period = parseInt(document.getElementById('period').value, 10);
+  const premium = parseFloat(document.getElementById('premium').value);
+  const bands = readRateBands();
+
+  if(!Number.isFinite(sumAssured) || !Number.isFinite(period) || period < 1 || !Number.isFinite(premium) || !Number.isFinite(startYear)){
+    alert('Please fill in Start Year, Sum Assured, Period and Annual Investment with valid numbers.');
+    return;
+  }
+  if(bands.length === 0){
+    alert('Please define at least one bonus rate band.');
+    return;
+  }
+
+  const resultBody = document.getElementById('resultBody');
+  resultBody.innerHTML = '';
+
+  const warningEl = document.getElementById('rangeWarning');
+  const lastBand = bands[bands.length - 1];
+  if(lastBand.to !== Infinity && period > lastBand.to){
+    warningEl.style.display = 'block';
+    warningEl.textContent = `Note: the selected bonus rates only go up to year ${lastBand.to}. Years ${lastBand.to + 1}–${period} have been calculated using the year ${lastBand.to} rate (${lastBand.rate} per 1,000) as an estimate — please confirm the correct rate for those years with the current official rate card.`;
+  } else {
+    warningEl.style.display = 'none';
+  }
+
+  let depositBalance = 0;
+  let bonusBalance = 0;
+
+  for(let y = 1; y <= period; y++){
+    depositBalance += premium;
+    const rate = rateForYear(bands, y);
+    bonusBalance += sumAssured / 1000 * rate;
+    const value = sumAssured + bonusBalance;
+    const calendarYear = startYear + y - 1;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${calendarYear}</td>
+      <td>${fmt(premium)}</td>
+      <td>${fmt(depositBalance)}</td>
+      <td>${fmt(bonusBalance)}</td>
+      <td>${fmt(value)}</td>
+    `;
+    resultBody.appendChild(tr);
+  }
+
+  const finalRow = document.createElement('tr');
+  finalRow.className = 'total-row';
+  finalRow.innerHTML = `
+    <td>Maturity</td>
+    <td>&mdash;</td>
+    <td>${fmt(depositBalance)}</td>
+    <td>${fmt(bonusBalance)}</td>
+    <td>${fmt(sumAssured + bonusBalance)}</td>
+  `;
+  resultBody.appendChild(finalRow);
+
+  const age = calcAge(dob, startYear);
+  document.getElementById('summary').innerHTML = `
+    <div><span class="k">Name:</span> ${name || '&mdash;'}</div>
+    <div><span class="k">Date of Birth:</span> ${dob || '&mdash;'}</div>
+    <div><span class="k">Age at start year:</span> ${age === '' ? '&mdash;' : age}</div>
+    <div><span class="k">Policy Start Year:</span> ${startYear}</div>
+    <div><span class="k">Sum Assured:</span> Rs. ${fmt(sumAssured)}</div>
+    <div><span class="k">Period:</span> ${period} years</div>
+    <div><span class="k">Annual Investment:</span> Rs. ${fmt(premium)}</div>
+  `;
+
+  document.getElementById('resultsCard').style.display = 'block';
+});
+
+document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+  window.print();
+});
+</script>
+
+</body>
+</html>
