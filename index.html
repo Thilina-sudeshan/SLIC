@@ -103,6 +103,7 @@
   }
   @media print{ .footer{display:none;} }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -398,7 +399,32 @@ document.getElementById('calcBtn').addEventListener('click', () => {
 });
 
 document.getElementById('downloadPdfBtn').addEventListener('click', () => {
-  window.print();
+  const btn = document.getElementById('downloadPdfBtn');
+  const card = document.getElementById('resultsCard');
+  const title = document.getElementById('printTitle');
+  const name = document.getElementById('name').value.trim().replace(/[^\w\-]+/g, '_');
+
+  if (typeof html2pdf === 'undefined') {
+    alert('PDF library failed to load. Check your internet connection and reload the page.');
+    return;
+  }
+
+  btn.style.visibility = 'hidden';
+  title.style.display = 'block';
+  btn.disabled = true;
+
+  html2pdf().set({
+    margin: 10,
+    filename: 'Policy_Statement' + (name ? '_' + name : '') + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+    pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
+  }).from(card).save().finally(() => {
+    btn.style.visibility = '';
+    btn.disabled = false;
+    title.style.display = '';
+  });
 });
 </script>
 
